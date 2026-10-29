@@ -81,6 +81,7 @@
   <button id="save">Save</button>
 
   <h2>Saved entries</h2>
+  <input id="search" type="search" placeholder="Search passages, notes and books">
   <div id="entries"></div>
 
   <!-- JavaScript: makes the page do things -->
@@ -99,14 +100,26 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
     }
 
-    // Draw every entry on the page, newest first.
+    // Draw the entries on the page, newest first.
+    // If something is typed in the search box, only show entries that contain it.
     function showEntries() {
       const list = document.getElementById("entries");
       list.innerHTML = ""; // clear what's there before redrawing
 
+      // What's in the search box, in lowercase so capital letters don't matter.
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      let shown = 0; // how many entries we've drawn
+
       const entries = loadEntries();
       // "index" is the entry's position in the list (0 for the first, 1 for the second, and so on).
       entries.forEach(function (entry, index) {
+        // Join all the entry's text together and check whether the search word is anywhere in it.
+        const allText = [entry.passage, entry.note, entry.book, entry.date].join(" ").toLowerCase();
+        if (!allText.includes(search)) {
+          return; // skip this entry
+        }
+        shown++;
+
         const box = document.createElement("div");
         box.className = "entry";
 
@@ -134,7 +147,18 @@
         box.append(deleteButton, passage, note, meta);
         list.append(box);
       });
+
+      // If a search found nothing, say so instead of showing a blank space.
+      if (search !== "" && shown === 0) {
+        const message = document.createElement("p");
+        message.className = "meta";
+        message.textContent = "No entries match \"" + search + "\".";
+        list.append(message);
+      }
     }
+
+    // Redraw the list every time something is typed in the search box.
+    document.getElementById("search").addEventListener("input", showEntries);
 
     // Remove one entry, after checking with the user, since it can't be undone.
     function deleteEntry(index) {
