@@ -34,10 +34,22 @@
       cursor: pointer;
     }
     .entry {
+      position: relative; /* lets the delete icon sit in this box's corner */
       background: white;
       border: 1px solid #ddd;
       padding: 16px;
+      padding-right: 48px; /* leaves room for the delete icon */
       margin-top: 16px;
+    }
+    .delete {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      margin: 0;
+      padding: 4px 8px;
+      background: none;
+      border: none;
+      font-size: 1.1em;
     }
     .passage {
       font-style: italic;
@@ -93,9 +105,19 @@
       list.innerHTML = ""; // clear what's there before redrawing
 
       const entries = loadEntries();
-      for (const entry of entries) {
+      // "index" is the entry's position in the list (0 for the first, 1 for the second, and so on).
+      entries.forEach(function (entry, index) {
         const box = document.createElement("div");
         box.className = "entry";
+
+        // The trash icon that deletes just this entry.
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "delete";
+        deleteButton.textContent = "🗑️";
+        deleteButton.title = "Delete this entry";
+        deleteButton.addEventListener("click", function () {
+          deleteEntry(index);
+        });
 
         const passage = document.createElement("p");
         passage.className = "passage";
@@ -109,9 +131,20 @@
         meta.className = "meta";
         meta.textContent = (entry.book || "Unknown book") + " · " + entry.date;
 
-        box.append(passage, note, meta);
+        box.append(deleteButton, passage, note, meta);
         list.append(box);
+      });
+    }
+
+    // Remove one entry, after checking with the user, since it can't be undone.
+    function deleteEntry(index) {
+      if (!confirm("Delete this entry? This can't be undone.")) {
+        return;
       }
+      const entries = loadEntries();
+      entries.splice(index, 1); // remove 1 item at this position
+      saveEntries(entries);
+      showEntries();
     }
 
     // What happens when Save is clicked.
