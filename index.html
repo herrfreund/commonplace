@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Commonplace Book</title>
+
+  <!-- CSS: controls how the page looks -->
+  <style>
+    body {
+      font-family: Georgia, serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 16px;
+      background: #faf8f3;
+      color: #222;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: bold;
+    }
+    textarea, input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      font: inherit;
+      margin-top: 4px;
+    }
+    button {
+      margin-top: 16px;
+      padding: 8px 20px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .entry {
+      background: white;
+      border: 1px solid #ddd;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .passage {
+      font-style: italic;
+      white-space: pre-wrap; /* keeps line breaks from the pasted text */
+    }
+    .note {
+      white-space: pre-wrap;
+    }
+    .meta {
+      color: #777;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HTML: the parts of the page -->
+  <h1>Commonplace Book</h1>
+
+  <label for="passage">Passage</label>
+  <textarea id="passage" rows="5"></textarea>
+
+  <label for="note">My note</label>
+  <textarea id="note" rows="3"></textarea>
+
+  <label for="book">Book title</label>
+  <input id="book" type="text">
+
+  <button id="save">Save</button>
+
+  <h2>Saved entries</h2>
+  <div id="entries"></div>
+
+  <!-- JavaScript: makes the page do things -->
+  <script>
+    // The name we store our entries under in the browser's storage.
+    const STORAGE_KEY = "commonplace-entries";
+
+    // Read the saved entries from the browser. If there are none yet, start with an empty list.
+    function loadEntries() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    // Write the list of entries into the browser's storage.
+    function saveEntries(entries) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }
+
+    // Draw every entry on the page, newest first.
+    function showEntries() {
+      const list = document.getElementById("entries");
+      list.innerHTML = ""; // clear what's there before redrawing
+
+      const entries = loadEntries();
+      for (const entry of entries) {
+        const box = document.createElement("div");
+        box.className = "entry";
+
+        const passage = document.createElement("p");
+        passage.className = "passage";
+        passage.textContent = entry.passage;
+
+        const note = document.createElement("p");
+        note.className = "note";
+        note.textContent = entry.note;
+
+        const meta = document.createElement("p");
+        meta.className = "meta";
+        meta.textContent = (entry.book || "Unknown book") + " · " + entry.date;
+
+        box.append(passage, note, meta);
+        list.append(box);
+      }
+    }
+
+    // What happens when Save is clicked.
+    document.getElementById("save").addEventListener("click", function () {
+      const passage = document.getElementById("passage").value.trim();
+      const note = document.getElementById("note").value.trim();
+      const book = document.getElementById("book").value.trim();
+
+      // Don't save an empty passage.
+      if (passage === "") {
+        alert("Please paste a passage first.");
+        return;
+      }
+
+      const entries = loadEntries();
+      // Put the new entry at the front of the list so it shows first.
+      entries.unshift({
+        passage: passage,
+        note: note,
+        book: book,
+        date: new Date().toLocaleString()
+      });
+      saveEntries(entries);
+
+      // Empty the boxes, ready for the next entry.
+      document.getElementById("passage").value = "";
+      document.getElementById("note").value = "";
+      document.getElementById("book").value = "";
+
+      showEntries();
+    });
+
+    // Show any saved entries when the page first opens.
+    showEntries();
+  </script>
+</body>
+</html>
