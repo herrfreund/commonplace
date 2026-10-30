@@ -81,6 +81,7 @@
   <button id="save">Save</button>
 
   <h2>Saved entries</h2>
+  <p id="count"></p>
   <input id="search" type="search" placeholder="Search passages, notes and books">
   <div id="entries"></div>
 
@@ -167,6 +168,8 @@
       let shown = 0; // how many entries we've drawn
 
       const entries = loadEntries();
+      document.getElementById("count").textContent = "You have" + entries.length + "passages";
+      
       // "index" is the entry's position in the list (0 for the first, 1 for the second, and so on).
       entries.forEach(function (entry, index) {
         // Gather all the entry's words, then check that every search word has a close match among them.
