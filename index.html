@@ -100,6 +100,61 @@
       localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
     }
 
+    // Turn text into a list of lowercase words, dropping punctuation.
+    // For example "Hello, World!" becomes ["hello", "world"].
+    function splitIntoWords(text) {
+      return text.toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(function (word) {
+        return word !== "";
+      });
+    }
+
+    // Count the fewest single-letter fixes needed to turn word a into word b.
+    // A fix is adding a letter, removing one, changing one, or swapping two side-by-side letters.
+    // This is called the "edit distance". For example "hapy" to "happy" is 1.
+    function editDistance(a, b) {
+      // d[i][j] will hold the number of fixes to turn the first i letters of a into the first j letters of b.
+      const d = [];
+      for (let i = 0; i <= a.length; i++) {
+        d[i] = [i]; // turning i letters into nothing takes i removals
+      }
+      for (let j = 0; j <= b.length; j++) {
+        d[0][j] = j; // turning nothing into j letters takes j additions
+      }
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const change = a[i - 1] === b[j - 1] ? 0 : 1;
+          d[i][j] = Math.min(
+            d[i - 1][j] + 1,         // remove a letter
+            d[i][j - 1] + 1,         // add a letter
+            d[i - 1][j - 1] + change // change a letter (free if they already match)
+          );
+          // Swap two side-by-side letters, like "teh" to "the".
+          if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+            d[i][j] = Math.min(d[i][j], d[i - 2][j - 2] + 1);
+          }
+        }
+      }
+      return d[a.length][b.length];
+    }
+
+    // How many typos we forgive in a search word. Short words must be exact,
+    // otherwise "cat" would also find "car", "hat" and "cut".
+    function allowedFixes(word) {
+      if (/\d/.test(word)) return 0; // numbers (like years in the date) must be exact
+      if (word.length <= 3) return 0;
+      if (word.length <= 7) return 1;
+      return 2;
+    }
+
+    // Does the search word match this word from an entry?
+    // Yes if it's part of the word ("run" in "running") or close enough to count as a typo.
+    function wordsAreClose(searchWord, entryWord) {
+      if (entryWord.includes(searchWord)) {
+        return true;
+      }
+      return editDistance(searchWord, entryWord) <= allowedFixes(searchWord);
+    }
+
     // Draw the entries on the page, newest first.
     // If something is typed in the search box, only show entries that contain it.
     function showEntries() {
@@ -108,14 +163,20 @@
 
       // What's in the search box, in lowercase so capital letters don't matter.
       const search = document.getElementById("search").value.trim().toLowerCase();
+      const searchWords = splitIntoWords(search);
       let shown = 0; // how many entries we've drawn
 
       const entries = loadEntries();
       // "index" is the entry's position in the list (0 for the first, 1 for the second, and so on).
       entries.forEach(function (entry, index) {
-        // Join all the entry's text together and check whether the search word is anywhere in it.
-        const allText = [entry.passage, entry.note, entry.book, entry.date].join(" ").toLowerCase();
-        if (!allText.includes(search)) {
+        // Gather all the entry's words, then check that every search word has a close match among them.
+        const entryWords = splitIntoWords([entry.passage, entry.note, entry.book, entry.date].join(" "));
+        const matches = searchWords.every(function (searchWord) {
+          return entryWords.some(function (entryWord) {
+            return wordsAreClose(searchWord, entryWord);
+          });
+        });
+        if (!matches) {
           return; // skip this entry
         }
         shown++;
