@@ -168,7 +168,12 @@
       let shown = 0; // how many entries we've drawn
 
       const entries = loadEntries();
-      document.getElementById("count").textContent = "You have " + entries.length + " passages";
+      if  (entries.length === 1){
+        document.getElementById("count").textContent = "You have " + entries.length + " passage";
+      }
+      else{
+        document.getElementById("count").textContent = "You have " + entries.length + " passages";
+      }
       
       // "index" is the entry's position in the list (0 for the first, 1 for the second, and so on).
       entries.forEach(function (entry, index) {
