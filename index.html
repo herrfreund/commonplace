@@ -62,12 +62,20 @@
       color: #777;
       font-size: 0.9em;
     }
+    .resurface {
+      background: #fff8e1; /* a warm yellow so it stands out from the saved list */
+      border-color: #e6d28a;
+      padding-right: 16px; /* no delete icon here, so no extra room needed */
+    }
   </style>
 </head>
 <body>
 
   <!-- HTML: the parts of the page -->
   <h1>Commonplace Book</h1>
+
+  <!-- A random past entry, picked each time the page opens. Hidden until there's one to show. -->
+  <div id="resurface" class="entry resurface" hidden></div>
 
   <label for="passage">Passage</label>
   <textarea id="passage" rows="5"></textarea>
@@ -270,7 +278,41 @@
       showEntries();
     });
 
-    // Show any saved entries when the page first opens.
+    // Pick one saved entry at random and show it at the top of the page.
+    function showRandomEntry() {
+      const entries = loadEntries();
+      if (entries.length === 0) {
+        return; // nothing saved yet, so leave the box hidden
+      }
+
+      // Math.random() gives a number from 0 up to (but not including) 1.
+      // Multiplying by the number of entries and rounding down gives a position in the list.
+      const entry = entries[Math.floor(Math.random() * entries.length)];
+
+      const box = document.getElementById("resurface");
+
+      const heading = document.createElement("p");
+      heading.className = "meta";
+      heading.textContent = "From your past";
+
+      const passage = document.createElement("p");
+      passage.className = "passage";
+      passage.textContent = entry.passage;
+
+      const note = document.createElement("p");
+      note.className = "note";
+      note.textContent = entry.note;
+
+      const meta = document.createElement("p");
+      meta.className = "meta";
+      meta.textContent = (entry.book || "Unknown book") + " · " + entry.date;
+
+      box.append(heading, passage, note, meta);
+      box.hidden = false; // now that it has something in it, show it
+    }
+
+    // When the page first opens, resurface a random entry and show all saved entries.
+    showRandomEntry();
     showEntries();
   </script>
 </body>
