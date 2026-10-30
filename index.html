@@ -90,6 +90,7 @@
 
   <h2>Saved entries</h2>
   <p id="count"></p>
+  <button id="download">Download backup</button>
   <input id="search" type="search" placeholder="Search passages, notes and books">
   <div id="entries"></div>
 
@@ -276,6 +277,31 @@
       document.getElementById("book").value = "";
 
       showEntries();
+    });
+
+    // What happens when Download backup is clicked: save all entries to a file on this computer.
+    document.getElementById("download").addEventListener("click", function () {
+      const entries = loadEntries();
+      if (entries.length === 0) {
+        alert("There are no entries to back up yet.");
+        return;
+      }
+
+      // Turn the entries into text. The extra "2" spaces it out so it's easy to read in a text editor.
+      const text = JSON.stringify(entries, null, 2);
+
+      // A "Blob" is a chunk of file data held in the browser's memory.
+      const file = new Blob([text], { type: "application/json" });
+
+      // Give the file a temporary address, then click an invisible link to it to start the download.
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(file);
+      const today = new Date().toISOString().slice(0, 10); // like "2026-10-30"
+      link.download = "commonplace-backup-" + today + ".json";
+      link.click();
+
+      // We're done with the temporary address, so let the browser free it.
+      URL.revokeObjectURL(link.href);
     });
 
     // Pick one saved entry at random and show it at the top of the page.
