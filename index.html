@@ -92,6 +92,7 @@
   <p id="count"></p>
   <button id="download">Download backup</button>
   <input id="search" type="search" placeholder="Search passages, notes and books">
+  <p id="search-status" class="meta"></p>
   <div id="entries"></div>
 
   <!-- JavaScript: makes the page do things -->
@@ -226,12 +227,15 @@
         list.append(box);
       });
 
-      // If a search found nothing, say so instead of showing a blank space.
-      if (search !== "" && shown === 0) {
-        const message = document.createElement("p");
-        message.className = "meta";
-        message.textContent = "No entries match \"" + search + "\".";
-        list.append(message);
+      // Under the search box, say how many passages match. Leave it blank when nothing is typed.
+      const status = document.getElementById("search-status");
+      if (search === "") {
+        status.textContent = "";
+      } else if (shown === 0) {
+        status.textContent = "No passages match \"" + search + "\".";
+      } else {
+        const word = entries.length === 1 ? "passage" : "passages"; // "1 passage" but "2 passages"
+        status.textContent = "Showing " + shown + " of " + entries.length + " " + word;
       }
     }
 
