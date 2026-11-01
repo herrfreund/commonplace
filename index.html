@@ -33,6 +33,9 @@
       font: inherit;
       cursor: pointer;
     }
+    #passage-count {
+      margin: 4px 0 0; /* sit snugly under the passage box */
+    }
     .form-buttons {
       display: flex; /* line the buttons up in a row */
       justify-content: space-between; /* first button on the left, last on the right */
@@ -83,6 +86,7 @@
 
   <label for="passage">Passage</label>
   <textarea id="passage" rows="5"></textarea>
+  <p id="passage-count" class="meta" hidden></p>
 
   <label for="note">My note</label>
   <textarea id="note" rows="3"></textarea>
@@ -288,6 +292,30 @@
       document.getElementById("book").value = "";
 
       showEntries();
+    });
+
+    // Write how many characters are in the passage box into the line underneath it.
+    function updatePassageCount() {
+      const length = document.getElementById("passage").value.length;
+      const word = length === 1 ? "character" : "characters";
+      document.getElementById("passage-count").textContent = length + " " + word;
+    }
+
+    const passageBox = document.getElementById("passage");
+    const passageCount = document.getElementById("passage-count");
+
+    // "focus" happens when the user clicks into the box: show the count.
+    passageBox.addEventListener("focus", function () {
+      updatePassageCount();
+      passageCount.hidden = false;
+    });
+
+    // "input" happens on every change to the text, like a keystroke or a paste: update the count.
+    passageBox.addEventListener("input", updatePassageCount);
+
+    // "blur" happens when the user clicks away from the box: hide the count.
+    passageBox.addEventListener("blur", function () {
+      passageCount.hidden = true;
     });
 
     // What happens when Clear is clicked: empty the three boxes. Saved entries are left alone.
