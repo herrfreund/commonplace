@@ -33,6 +33,10 @@
       font: inherit;
       cursor: pointer;
     }
+    .form-buttons {
+      display: flex; /* line the buttons up in a row */
+      justify-content: space-between; /* first button on the left, last on the right */
+    }
     .entry {
       position: relative; /* lets the delete icon sit in this box's corner */
       background: white;
@@ -86,7 +90,10 @@
   <label for="book">Book title</label>
   <input id="book" type="text">
 
-  <button id="save">Save</button>
+  <div class="form-buttons">
+    <button id="save">Save</button>
+    <button id="clear">Clear</button>
+  </div>
 
   <h2>Saved entries</h2>
   <p id="count"></p>
@@ -281,6 +288,13 @@
       document.getElementById("book").value = "";
 
       showEntries();
+    });
+
+    // What happens when Clear is clicked: empty the three boxes. Saved entries are left alone.
+    document.getElementById("clear").addEventListener("click", function () {
+      document.getElementById("passage").value = "";
+      document.getElementById("note").value = "";
+      document.getElementById("book").value = "";
     });
 
     // What happens when Download backup is clicked: save all entries to a file on this computer.
