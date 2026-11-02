@@ -245,7 +245,7 @@
       } else if (shown === 0) {
         status.textContent = "No passages match \"" + search + "\".";
       } else {
-        const word = entries.length === 1 ? "passage" : "passages"; // "1 passage" but "2 passages"
+        const word = counter(entries.length) // "1 passage" but "2 passages"
         status.textContent = "Showing " + shown + " of " + entries.length + " " + word;
       }
     }
@@ -386,6 +386,14 @@
     // When the page first opens, resurface a random entry and show all saved entries.
     showRandomEntry();
     showEntries();
+    function counter(count){
+      if(entries.length === 1){
+         return "passage" ;
+      } else{
+         return "passages" ;
+      }
+    }
+
   </script>
 </body>
 </html>
