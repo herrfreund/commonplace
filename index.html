@@ -276,6 +276,12 @@
         return;
       }
 
+      // Don't save without a book title either.
+      if (book === "") {
+        alert("enter a book title big papi");
+        return;
+      }
+
       const entries = loadEntries();
       // Put the new entry at the front of the list so it shows first.
       entries.unshift({
@@ -391,6 +397,15 @@
          return "passage" ;
       } else{
          return "passages" ;
+      }
+    }
+
+    // "1 book" but "2 books"
+    function bookCounter(count) {
+      if (count === 1) {
+        return "book";
+      } else {
+        return "books";
       }
     }
 
