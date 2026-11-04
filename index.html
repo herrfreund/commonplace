@@ -300,11 +300,22 @@
       showEntries();
     });
 
+    function wordCount(){
+      const terms = document.getElementById("passage").value.split(" ");
+      let count = 0
+      terms.forEach(function(piece){
+        if(piece !== ""){
+          count = count + 1;
+        } 
+      }); 
+      const word = count === 1 ? "word" : "words";
+       return count + " " + word;
+    }
     // Write how many characters are in the passage box into the line underneath it.
     function updatePassageCount() {
       const length = document.getElementById("passage").value.length;
       const word = length === 1 ? "character" : "characters";
-      document.getElementById("passage-count").textContent = length + " " + word;
+      document.getElementById("passage-count").textContent = wordCount()+ " · " + length + " " + word;
     }
 
     const passageBox = document.getElementById("passage");
@@ -397,15 +408,6 @@
          return "passage" ;
       } else{
          return "passages" ;
-      }
-    }
-
-    // "1 book" but "2 books"
-    function bookCounter(count) {
-      if (count === 1) {
-        return "book";
-      } else {
-        return "books";
       }
     }
 
