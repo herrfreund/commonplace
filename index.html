@@ -110,6 +110,7 @@
   <script>
     // The name we store our entries under in the browser's storage.
     const STORAGE_KEY = "commonplace-entries";
+    let editing = null;
 
     // Read the saved entries from the browser. If there are none yet, start with an empty list.
     function loadEntries() {
@@ -221,6 +222,15 @@
         deleteButton.addEventListener("click", function () {
           deleteEntry(index);
         });
+        const clicker = document.createElement("button");
+        clicker.textContent = "Edit";
+        clicker.addEventListener("click", function(){
+         document.getElementById("passage").value = entry.passage;
+         document.getElementById("note").value = entry.note;
+         document.getElementById("book").value = entry.book;
+         editing = index;      
+        })
+
 
         const passage = document.createElement("p");
         passage.className = "passage";
@@ -234,7 +244,7 @@
         meta.className = "meta";
         meta.textContent = (entry.book || "Unknown book") + " · " + entry.date;
 
-        box.append(deleteButton, passage, note, meta);
+        box.append(deleteButton, passage, note, meta, clicker);
         list.append(box);
       });
 
@@ -284,12 +294,22 @@
 
       const entries = loadEntries();
       // Put the new entry at the front of the list so it shows first.
+      
+      if(editing!== null){
+        entries[editing].passage = passage;
+        entries[editing].note = note;
+        entries[editing].book = book;
+        editing = null;     
+      } else{ 
       entries.unshift({
         passage: passage,
         note: note,
         book: book,
         date: new Date().toLocaleString()
       });
+    }
+    
+    
       saveEntries(entries);
 
       // Empty the boxes, ready for the next entry.
@@ -309,7 +329,6 @@
         } 
       }); 
       const word = count === 1 ? "word" : "words";
-       return count + " " + word;
     }
     // Write how many characters are in the passage box into the line underneath it.
     function updatePassageCount() {
@@ -340,6 +359,7 @@
       document.getElementById("passage").value = "";
       document.getElementById("note").value = "";
       document.getElementById("book").value = "";
+      editing = null;
     });
 
     // What happens when Download backup is clicked: save all entries to a file on this computer.
